@@ -133,7 +133,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
     {
       const auto& gains = params_.gains.joints_map.at(params_.joints[i]);
       pids_[i] = std::make_shared<control_toolbox::Pid>(gains.p, gains.i, gains.d, gains.i_clamp, -gains.i_clamp);
-      RCLCPP_INFO(get_node()->get_logger(), "%f", gains.p);
+      // RCLCPP_INFO(get_node()->get_logger(), "%f", gains.p);
       // TODO(destogl): remove this in ROS2 Iron
       // Check deprecated style for "ff_velocity_scale" parameter definition.
       // if (gains.ff_velocity_scale == 0.0)
