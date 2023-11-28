@@ -247,6 +247,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         if ((before_last_point || first_sample) &&
             !check_state_tolerance_per_joint(state_error_, index, default_tolerances_.state_tolerance[index], false))
         {
+          RCLCPP_INFO(get_node()->get_logger(), "tolerance_violated_while_moving");
           tolerance_violated_while_moving = true;
         }
         // past the final point, check that we end up inside goal tolerance
@@ -1443,6 +1444,7 @@ bool DTCompensatedJointTrajectoryController::validate_trajectory_msg(
 void DTCompensatedJointTrajectoryController::add_new_trajectory_msg(
     const std::shared_ptr<trajectory_msgs::msg::JointTrajectory>& traj_msg)
 {
+  RCLCPP_INFO(get_node()->get_logger(), "Adding new trajectory msg");
   traj_msg_external_point_ptr_.writeFromNonRT(traj_msg);
 }
 
@@ -1467,6 +1469,28 @@ void DTCompensatedJointTrajectoryController::set_hold_position()
 
   auto traj_msg = std::make_shared<trajectory_msgs::msg::JointTrajectory>(empty_msg);
   add_new_trajectory_msg(traj_msg);
+
+  // Set command not to move
+  read_state_from_hardware(state_current_);
+  state_desired_ = state_current_;
+  last_commanded_state_ = state_current_;
+  for (size_t index = 0; index < dof_; ++index)
+  {
+    if (has_position_command_interface_)
+    {
+      joint_command_interface_[0][index].get().set_value(joint_command_interface_[0][index].get().get_value());
+    }
+
+    if (has_velocity_command_interface_)
+    {
+      joint_command_interface_[1][index].get().set_value(0.0);
+    }
+
+    if (has_effort_command_interface_)
+    {
+      joint_command_interface_[3][index].get().set_value(0.0);
+    }
+  }
 }
 
 bool DTCompensatedJointTrajectoryController::contains_interface_type(
