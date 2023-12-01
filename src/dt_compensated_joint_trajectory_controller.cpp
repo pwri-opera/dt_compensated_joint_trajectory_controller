@@ -158,6 +158,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
 
   auto compute_error_for_joint = [&](JointTrajectoryPoint& error, int index, const JointTrajectoryPoint& current,
                                      const JointTrajectoryPoint& desired) {
+    // RCLCPP_INFO(get_node()->get_logger(), "compute_error_for_joint");
     // error defined as the difference between current and desired
     if (normalize_joint_error_[index])
     {
@@ -308,6 +309,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         }
         if (has_effort_command_interface_)
         {
+          RCLCPP_WARN(get_node()->get_logger(), "Effort command is updated");
           assign_interface_from_point(joint_command_interface_[3], tmp_command_);
         }
 
@@ -349,6 +351,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         {
           if (!outside_goal_tolerance)
           {
+            set_hold_position();
             auto res = std::make_shared<FollowJTrajAction::Result>();
             res->set__error_code(FollowJTrajAction::Result::SUCCESSFUL);
             active_goal->setSucceeded(res);
