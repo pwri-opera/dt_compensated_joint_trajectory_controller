@@ -246,15 +246,16 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         // Always check the state tolerance on the first sample in case the first sample
         // is the last point
         if ((before_last_point || first_sample) &&
-            !check_state_tolerance_per_joint(state_error_, index, default_tolerances_.state_tolerance[index], false))
+            !check_state_tolerance_per_joint(state_error_, index, default_tolerances_.state_tolerance[index], true))
         {
-          RCLCPP_INFO(get_node()->get_logger(), "tolerance_violated_while_moving");
+          // RCLCPP_INFO(get_node()->get_logger(), "tolerance_violated_while_moving");
           tolerance_violated_while_moving = true;
         }
         // past the final point, check that we end up inside goal tolerance
         if (!before_last_point && !check_state_tolerance_per_joint(
-                                      state_error_, index, default_tolerances_.goal_state_tolerance[index], false))
+                                      state_error_, index, default_tolerances_.goal_state_tolerance[index], true))
         {
+          // RCLCPP_INFO(get_node()->get_logger(), "outside_goal_tolerance");
           outside_goal_tolerance = true;
 
           if (default_tolerances_.goal_time_tolerance != 0.0)
@@ -309,7 +310,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         }
         if (has_effort_command_interface_)
         {
-          RCLCPP_WARN(get_node()->get_logger(), "Effort command is updated");
+          // RCLCPP_WARN(get_node()->get_logger(), "Effort command is updated");
           assign_interface_from_point(joint_command_interface_[3], tmp_command_);
         }
 
