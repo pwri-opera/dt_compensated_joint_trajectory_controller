@@ -390,6 +390,9 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
   }
 
   publish_state(state_desired_, state_current_, state_error_);
+  // RCLCPP_INFO(get_node()->get_logger(), "state_current_vel_: %f", state_current_.velocities[3]);
+  RCLCPP_INFO(get_node()->get_logger(), "state_desired: %f", state_desired_.positions[3]);
+
   return controller_interface::return_type::OK;
 }
 

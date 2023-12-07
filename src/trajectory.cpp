@@ -122,6 +122,7 @@ bool Trajectory::sample(const rclcpp::Time& sample_time,
 
     const rclcpp::Time t0 = trajectory_start_time_ + point.time_from_start;
     const rclcpp::Time t1 = trajectory_start_time_ + next_point.time_from_start;
+    // const rclcpp::Time t1 = trajectory_start_time_;
 
     if (sample_time >= t0 && sample_time < t1)
     {
