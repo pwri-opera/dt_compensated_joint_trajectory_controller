@@ -124,31 +124,12 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
 {
   if (use_closed_loop_pid_adapter_)
   {
-    // pids_.resize(dof_);
-    // ff_velocity_scale_.resize(dof_);
-    // tmp_command_.resize(dof_, 0.0);
-
     // Init PID gains from ROS parameters
     params_ = param_listener_->get_params();
     for (size_t i = 0; i < dof_; ++i)
     {
       const auto& gains = params_.gains.joints_map.at(params_.joints[i]);
       pids_[i] = std::make_shared<control_toolbox::Pid>(gains.p, gains.i, gains.d, gains.i_clamp, -gains.i_clamp);
-      // RCLCPP_INFO(get_node()->get_logger(), "%f", gains.p);
-      // TODO(destogl): remove this in ROS2 Iron
-      // Check deprecated style for "ff_velocity_scale" parameter definition.
-      // if (gains.ff_velocity_scale == 0.0)
-      // {
-      //   RCLCPP_WARN(get_node()->get_logger(),
-      //               "'ff_velocity_scale' parameters is not defined under 'gains.<joint_name>.' structure. "
-      //               "Maybe you are using deprecated format 'ff_velocity_scale/<joint_name>'!");
-
-      //   ff_velocity_scale_[i] = auto_declare<double>("ff_velocity_scale/" + params_.joints[i], 0.0);
-      // }
-      // else
-      // {
-      //   ff_velocity_scale_[i] = gains.ff_velocity_scale;
-      // }
     }
   }
 
@@ -249,14 +230,12 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         if ((before_last_point || first_sample) &&
             !check_state_tolerance_per_joint(state_error_, index, default_tolerances_.state_tolerance[index], false))
         {
-          // RCLCPP_INFO(get_node()->get_logger(), "tolerance_violated_while_moving");
           tolerance_violated_while_moving = true;
         }
         // past the final point, check that we end up inside goal tolerance
         if (!before_last_point && !check_state_tolerance_per_joint(
                                       state_error_, index, default_tolerances_.goal_state_tolerance[index], false))
         {
-          // RCLCPP_INFO(get_node()->get_logger(), "outside_goal_tolerance");
           outside_goal_tolerance = true;
 
           if (default_tolerances_.goal_time_tolerance != 0.0)
@@ -311,7 +290,6 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         }
         if (has_effort_command_interface_)
         {
-          // RCLCPP_WARN(get_node()->get_logger(), "Effort command is updated");
           assign_interface_from_point(joint_command_interface_[3], tmp_command_);
         }
 
