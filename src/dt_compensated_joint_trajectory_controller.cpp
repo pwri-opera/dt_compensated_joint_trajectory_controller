@@ -1,4 +1,5 @@
 // Copyright (c) 2021 ros2_control Development Team
+// Copyright (c) 2023 PWRI
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -121,6 +122,17 @@ DTCompensatedJointTrajectoryController::state_interface_configuration() const
 controller_interface::return_type DTCompensatedJointTrajectoryController::update(const rclcpp::Time& time,
                                                                                  const rclcpp::Duration& period)
 {
+  if (use_closed_loop_pid_adapter_)
+  {
+    // Init PID gains from ROS parameters
+    params_ = param_listener_->get_params();
+    for (size_t i = 0; i < dof_; ++i)
+    {
+      const auto& gains = params_.gains.joints_map.at(params_.joints[i]);
+      pids_[i] = std::make_shared<control_toolbox::Pid>(gains.p, gains.i, gains.d, gains.i_clamp, -gains.i_clamp);
+    }
+  }
+
   if (get_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE)
   {
     return controller_interface::return_type::OK;
@@ -128,6 +140,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
 
   auto compute_error_for_joint = [&](JointTrajectoryPoint& error, int index, const JointTrajectoryPoint& current,
                                      const JointTrajectoryPoint& desired) {
+    // RCLCPP_INFO(get_node()->get_logger(), "compute_error_for_joint");
     // error defined as the difference between current and desired
     if (normalize_joint_error_[index])
     {
@@ -318,6 +331,7 @@ controller_interface::return_type DTCompensatedJointTrajectoryController::update
         {
           if (!outside_goal_tolerance)
           {
+            set_hold_position();
             auto res = std::make_shared<FollowJTrajAction::Result>();
             res->set__error_code(FollowJTrajAction::Result::SUCCESSFUL);
             active_goal->setSucceeded(res);
@@ -1413,6 +1427,7 @@ bool DTCompensatedJointTrajectoryController::validate_trajectory_msg(
 void DTCompensatedJointTrajectoryController::add_new_trajectory_msg(
     const std::shared_ptr<trajectory_msgs::msg::JointTrajectory>& traj_msg)
 {
+  RCLCPP_INFO(get_node()->get_logger(), "Adding new trajectory msg");
   traj_msg_external_point_ptr_.writeFromNonRT(traj_msg);
 }
 
@@ -1437,6 +1452,28 @@ void DTCompensatedJointTrajectoryController::set_hold_position()
 
   auto traj_msg = std::make_shared<trajectory_msgs::msg::JointTrajectory>(empty_msg);
   add_new_trajectory_msg(traj_msg);
+
+  // Set command not to move
+  read_state_from_hardware(state_current_);
+  state_desired_ = state_current_;
+  last_commanded_state_ = state_current_;
+  for (size_t index = 0; index < dof_; ++index)
+  {
+    if (has_position_command_interface_)
+    {
+      joint_command_interface_[0][index].get().set_value(joint_command_interface_[0][index].get().get_value());
+    }
+
+    if (has_velocity_command_interface_)
+    {
+      joint_command_interface_[1][index].get().set_value(0.0);
+    }
+
+    if (has_effort_command_interface_)
+    {
+      joint_command_interface_[3][index].get().set_value(0.0);
+    }
+  }
 }
 
 bool DTCompensatedJointTrajectoryController::contains_interface_type(
