@@ -2,6 +2,26 @@
 [joint_trajectory_controller](https://github.com/ros-controls/ros2_controllers/tree/master/joint_trajectory_controller)をベースにした zx200_ros2 用controller．
 無駄時間補償機能を追加するかは未定．
 
+## ビルド方法
+- ワークスペースの作成（既にwsを作成済の場合は不要．
+以下、新規作成するワークスペースの名称を `ros2_ws` と仮定して表記）
+  ```bash
+  $ cd ~/
+  $ mkdir --parents ros2_ws/src
+  $ cd ros2_ws
+  $ colcon build 
+  ```
+
+- ~/ros2_ws/以下にbuild, install, log, srcディレクトリが作成される
+
+- ~/ros2_ws/src 以下にクローンしてビルド
+```bash
+$ cd ~/ros2_ws/src
+$ git clone https://github.com/pwri-opera/dt_compensated_joint_trajectory_controller.git
+$ cd ~/ros2_ws
+$ colcon build --symlink-install 
+$ . install/setup.bash
+```
 
 # joint_trajectory_controller との相違点
 
