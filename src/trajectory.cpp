@@ -121,8 +121,8 @@ bool Trajectory::sample(const rclcpp::Time& sample_time,
     auto& next_point = trajectory_msg_->points[i + 1];
 
     const rclcpp::Time t0 = trajectory_start_time_ + point.time_from_start;
-    const rclcpp::Time t1 = trajectory_start_time_ + next_point.time_from_start;
-    // const rclcpp::Time t1 = trajectory_start_time_;
+    // const rclcpp::Time t1 = trajectory_start_time_ + next_point.time_from_start;
+    const rclcpp::Time t1 = trajectory_start_time_;  // for gain tuning
 
     if (sample_time >= t0 && sample_time < t1)
     {
