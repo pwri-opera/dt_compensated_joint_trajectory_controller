@@ -6,7 +6,7 @@
 
 ## ビルド方法
 - ワークスペースの作成（既にwsを作成済の場合は不要．
-以下、新規作成するワークスペースの名称を `ros2_ws` と仮定して表記）
+以下，新規作成するワークスペースの名称を `ros2_ws` と仮定して表記）
   ```bash
   $ cd ~/
   $ mkdir --parents ros2_ws/src
@@ -61,7 +61,7 @@ velocity, effortをcommand interfaceとして用いる場合，
   - `i_clamp`: 積分クランプ．正と負の両方の方向で対称．デフォルトは0.0．
   - `ff_velocity_scale`: 速度のフィードフォワードスケーリング．デフォルトは0.0．
   - `normalize_error`: (非推奨) 位置エラーの正規化を -pi から pi に使用する．デフォルトはfalse．
-  - `angle_wraparound`: 巻き戻し可能なジョイント（つまり、連続する）のため．位置エラーを -pi から pi に正規化する．デフォルトはfalse．
+  - `angle_wraparound`: 巻き戻し可能なジョイント（つまり，連続する）のため．位置エラーを -pi から pi に正規化する．デフォルトはfalse．
 - `constraints`:
   - `stopped_velocity_tolerance`: トラジェクトリの終端で制御システムが停止していることを示す速度許容値．デフォルトは0.01．
   - `goal_time`: トラジェクトリのゴールを指令時間の前後で達成するための時間許容値．デフォルトは0.0．
